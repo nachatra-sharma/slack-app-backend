@@ -1,18 +1,24 @@
 import mongoose from "mongoose";
 
-import { DEV_DB_URL, NODE_ENV, PROD_DB_URL } from "./serverConfig.js";
+import env from "./serverConfig.js";
 
 export const connectToDB = async () => {
-  try {
-    if (NODE_ENV === "production") {
-      await mongoose.connect(PROD_DB_URL as string);
-    } else {
-      await mongoose.connect(DEV_DB_URL as string);
-    }
-    console.log(
-      `Connected to the database successfully for ${NODE_ENV === "production" ? "production" : "development"} environment`
-    );
-  } catch (error) {
-    console.log("Error connecting to the database:", error);
-  }
+  const DB_URL =
+    env.NODE_ENV === "production" ? env.PROD_DB_URL : env.DEV_DB_URL;
+
+  mongoose.connection.on("error", (err) => {
+    console.log(`Error connecting to the database: ${err.message}`);
+  });
+  mongoose.connection.on("disconnected", () => {
+    console.log("Disconnected from the database");
+  });
+  mongoose.connection.on("connected", () => {
+    console.log("Connected to the database");
+  });
+
+  await mongoose.connect(DB_URL);
+
+  console.log(
+    `Connected to the database successfully for ${env.NODE_ENV === "production" ? "production" : "development"} environment`
+  );
 };

@@ -1,25 +1,30 @@
-import express, { type Request, type Response } from "express";
-import { StatusCodes } from "http-status-codes";
+import express from "express";
 
 import { connectToDB } from "./config/dbConfig.js";
-import { PORT } from "./config/serverConfig.js";
-import router from "./routers/apiRouter.js";
+import env from "./config/serverConfig.js";
+import { GenericErrorHandler } from "./middlewares/error.middleware.js";
+import { NotFoundHandler } from "./middlewares/notFound.middleware.js";
+import apiRouter from "./routers/apiRouter.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+app.use("/api", apiRouter);
+app.use(NotFoundHandler);
+app.use(GenericErrorHandler);
 
-app.get("/ping", (_req: Request, res: Response) => {
-  return res.status(StatusCodes.OK).json({
-    success: true,
-    message: "pong"
-  });
-});
+const startServer = async () => {
+  try {
+    await connectToDB();
+    app.listen(env.PORT, async () => {
+      console.log("Server is running on port 3000");
+    });
+  } catch (error) {
+    console.error("Failed to start the server:", error);
+    process.exit(1);
+  }
+};
 
-app.listen(PORT, async () => {
-  console.log("Server is running on port 3000");
-  await connectToDB();
-});
+startServer();

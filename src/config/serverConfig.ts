@@ -1,12 +1,20 @@
 import dotenv from "dotenv";
+import z from "zod";
 
+import { envSchema } from "../validations/config/env.validations.js";
 dotenv.config();
 
-export const PORT = process.env["PORT"] || 3000;
+function loadEnv() {
+  const response = envSchema.safeParse(process.env);
+  if (!response.success) {
+    const prettyError = z.prettifyError(response.error);
+    throw new Error(prettyError);
+  } else {
+    console.log("Successfully loaded environment variables");
+    return response.data;
+  }
+}
 
-export const NODE_ENV: "development" | "production" =
-  process.env["NODE_ENV"] === "production" ? "production" : "development";
+const env = loadEnv();
 
-export const DEV_DB_URL = process.env["DEV_DB_URL"];
-
-export const PROD_DB_URL = process.env["PROD_DB_URL"];
+export default env;

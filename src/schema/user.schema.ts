@@ -1,41 +1,64 @@
+import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+export type IUser = {
+  email: string;
+  password: string;
+  username: string;
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+const userSchema = new mongoose.Schema<IUser>(
   {
     email: {
       type: String,
       required: [true, "Email is required"],
       unique: [true, "Email already exist."],
-      match: [
-        // eslint-disable-next-line
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Please fill a valid email address"
-      ]
+      lowercase: true
     },
     password: {
       type: String,
-      required: [true, "Password is required."]
+      required: [true, "Password is required."],
+      select: false
     },
     username: {
       type: String,
       unique: [true, "Username already exists."],
       required: [true, "Username is required."],
-      match: [
-        /^[a-zA-Z0-9]+$/,
-        "Username must contains only letters and numbers."
-      ]
+      lowercase: true
     },
     avatar: {
       type: String
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: function (_doc, ret) {
+        const { password: _password, __v: _v, ...rest } = ret;
+        return rest;
+      }
+    }
+  }
 );
 
-userSchema.pre("save", function saveUserAvatar() {
-  this.avatar = `https://robohash.org/${this.username}`;
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) {
+    return;
+  }
+  const salt = await bcrypt.genSalt(12);
+  const hashedPassword = await bcrypt.hash(this.password, salt);
+  this.password = hashedPassword;
 });
 
-const User = mongoose.model("User", userSchema);
+userSchema.pre("save", function () {
+  if (this.isNew && !this.avatar) {
+    this.avatar = `https://robohash.org/${this.username}`;
+  }
+});
+
+const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;

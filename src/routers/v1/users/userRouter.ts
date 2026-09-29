@@ -1,15 +1,42 @@
 import express from "express";
-import { StatusCodes } from "http-status-codes";
+
+import {
+  deleteUserById,
+  getAllUser,
+  getUserByEmail,
+  getUserById,
+  getUserByUsername,
+  updateUserById,
+  userSignUp
+} from "../../../controllers/users.controllers.js";
+import {
+  userSignupRequestBodySchema,
+  userUpdateRequestBodySchema
+} from "../../../validations/user/user.validations.js";
+import { validateRequestBody } from "../../../validations/validate.js";
 
 const userRouter = express.Router();
 
-userRouter.get("/", (_req, res) => {
-  return res.status(StatusCodes.OK).json({
-    success: true,
-    message: "Successfully fetched all users.",
-    data: {},
-    error: {}
-  });
-});
+userRouter.get("/", getAllUser);
+
+userRouter.get("/id/:id", getUserById);
+
+userRouter.get("/username/:username", getUserByUsername);
+
+userRouter.get("/email/:email", getUserByEmail);
+
+userRouter.post(
+  "/signup",
+  validateRequestBody(userSignupRequestBodySchema),
+  userSignUp
+);
+
+userRouter.patch(
+  "/:id",
+  validateRequestBody(userUpdateRequestBodySchema),
+  updateUserById
+);
+
+userRouter.delete("/:id", deleteUserById);
 
 export default userRouter;
