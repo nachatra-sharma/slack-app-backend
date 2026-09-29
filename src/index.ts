@@ -3,11 +3,14 @@ import { StatusCodes } from "http-status-codes";
 
 import { connectToDB } from "./config/dbConfig.js";
 import { PORT } from "./config/serverConfig.js";
+import router from "./routers/apiRouter.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api", router);
 
 app.get("/ping", (_req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json({
