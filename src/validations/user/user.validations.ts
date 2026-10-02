@@ -26,7 +26,7 @@ export const userSignupRequestBodySchema = z.object({
     .max(14, { error: "Password must be at most 14 characters" })
 });
 
-export const userUpdateRequestBodySchema = z.object({
+export const userUpdateRequestBodySchema = z.strictObject({
   username: z
     .string()
     .trim()
@@ -41,11 +41,18 @@ export const userUpdateRequestBodySchema = z.object({
       error: "Username must contain only letters and numbers"
     })
     .optional(),
+  avatar: z.string().optional()
+});
+
+export const userSigninRequestBodySchema = z.object({
   email: z
     .string()
     .trim()
     .min(1, { error: "Email is required" })
-    .pipe(z.email({ error: "Enter a valid email address" }))
-    .optional(),
-  avatar: z.string().optional()
+    .pipe(z.email({ error: "Enter a valid email address" })),
+  password: z
+    .string()
+    .min(1, { error: "Password is required" })
+    .min(7, { error: "Password must be at least 7 characters" })
+    .max(14, { error: "Password must be at most 14 characters" })
 });

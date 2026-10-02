@@ -6,3 +6,8 @@ export type UserType = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type UserSigninType = {
+  email: string;
+  password: string;
+};

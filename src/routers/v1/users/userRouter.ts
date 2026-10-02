@@ -7,9 +7,11 @@ import {
   getUserById,
   getUserByUsername,
   updateUserById,
+  userSignin,
   userSignUp
 } from "../../../controllers/users.controllers.js";
 import {
+  userSigninRequestBodySchema,
   userSignupRequestBodySchema,
   userUpdateRequestBodySchema
 } from "../../../validations/user/user.validations.js";
@@ -29,6 +31,12 @@ userRouter.post(
   "/signup",
   validateRequestBody(userSignupRequestBodySchema),
   userSignUp
+);
+
+userRouter.post(
+  "/signin",
+  validateRequestBody(userSigninRequestBodySchema),
+  userSignin
 );
 
 userRouter.patch(

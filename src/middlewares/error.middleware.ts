@@ -6,20 +6,22 @@ import { errorResponse } from "../utils/common/response.utils.js";
 import { AppError } from "../utils/error/error.utils.js";
 
 export const GenericErrorHandler = (
-  error: AppError,
+  error: unknown,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   if (res.headersSent) return next(error);
+
   if (error instanceof AppError) {
     if (error.statusCode >= 500) {
       console.error(`[${req.method} ${req.originalUrl}]`, error);
-      return res
-        .status(error.statusCode)
-        .json(errorResponse(error.details ?? {}, error.message));
     }
+    return res
+      .status(error.statusCode)
+      .json(errorResponse(error.details ?? {}, error.message));
   }
+
   if (error instanceof mongoose.Error.CastError) {
     return res
       .status(StatusCodes.BAD_REQUEST)

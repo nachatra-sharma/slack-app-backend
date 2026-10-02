@@ -1,9 +1,31 @@
+import bcrypt from "bcrypt";
+
 import userCrudRepositories from "../repositories/user.repositories.js";
-import type { UserType } from "../types/user.types.js";
+import type { UserSigninType, UserType } from "../types/user.types.js";
+import { generateToken } from "../utils/common/jwt.utils.js";
 import { NotFoundError } from "../utils/error/error.utils.js";
 
 export const userSignupService = async (data: UserType) => {
   return await userCrudRepositories.create(data);
+};
+
+export const userSigninService = async (data: UserSigninType) => {
+  const user = await userCrudRepositories.getUserByEmailWithPassword(
+    data.email
+  );
+  if (!user) {
+    throw new NotFoundError("User not found with the given details.");
+  }
+  const isPasswordValid = await bcrypt.compare(data.password, user.password);
+  if (!isPasswordValid) {
+    throw new NotFoundError("User not found with the given details.");
+  }
+  const token = generateToken({
+    username: user.username,
+    email: user.email,
+    id: user._id.toString()
+  });
+  return { user, token };
 };
 
 export const getAllUsersService = async () => {
