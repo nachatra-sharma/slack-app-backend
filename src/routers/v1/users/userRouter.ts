@@ -10,6 +10,7 @@ import {
   userSignin,
   userSignUp
 } from "../../../controllers/users.controllers.js";
+import { AuthMiddleware } from "../../../middlewares/auth.middleware.js";
 import {
   userSigninRequestBodySchema,
   userSignupRequestBodySchema,
@@ -19,7 +20,7 @@ import { validateRequestBody } from "../../../validations/validate.js";
 
 const userRouter = express.Router();
 
-userRouter.get("/", getAllUser);
+userRouter.get("/", AuthMiddleware, getAllUser);
 
 userRouter.get("/id/:id", getUserById);
 
